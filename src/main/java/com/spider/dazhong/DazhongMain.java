@@ -1,22 +1,18 @@
-package com.spider.meituan;
+package com.spider.dazhong;
 
 import cn.wanghaomiao.xpath.model.JXDocument;
 import com.google.gson.Gson;
-import com.spider.meituan.dao.CommentMapper;
-import com.spider.meituan.dao.CourseMapper;
-import com.spider.meituan.dao.ShopDetailMapper;
-import com.spider.meituan.dao.ShopMapper;
-import com.spider.meituan.entity.Comment;
-import com.spider.meituan.entity.Course;
-import com.spider.meituan.entity.Shop;
-import com.spider.meituan.entity.ShopDetail;
+import com.spider.dazhong.dao.CommentMapper;
+import com.spider.dazhong.dao.CourseMapper;
+import com.spider.dazhong.dao.ShopDetailMapper;
+import com.spider.dazhong.dao.ShopMapper;
+import com.spider.dazhong.entity.*;
 import com.spider.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 import redis.clients.jedis.Jedis;
 import tk.mybatis.mapper.entity.Example;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +23,7 @@ import java.util.Map;
  * @description: TODO description
  * @date 2019/10/15 18:51
  */
-public class MeituanMain {
+public class DazhongMain {
 
     private static Jedis jedis = JedisUtils.getJedis();
 
@@ -36,18 +32,16 @@ public class MeituanMain {
 //        List<Comment> commentList = mapper.selectAll();
 //        System.out.println(commentList);
 
-//        insertShop();
-        getShopDetail();
+        insertShop();
+//        getShopDetail();
 
 
     }
 
     public static void insertShop() throws Exception {
-        List<Shop> dataList = getDataList();
+        List<ShopCategory> second = getSecond();
+
         ShopMapper mapper = MyBatisUtil.getMapper(ShopMapper.class);
-        for (Shop shop : dataList) {
-            mapper.insert(shop);
-        }
     }
 
     public static void getShopDetail() throws Exception {
@@ -79,8 +73,8 @@ public class MeituanMain {
                     } else {
                         System.out.println("shopId:" + shop.getShopId() + " shopLink为空,跳过");
                     }
-                }else {
-                    System.out.println("meituan shopId:"+shop.getmShopId()+"数据已存在,跳过该查询");
+                } else {
+                    System.out.println("meituan shopId:" + shop.getmShopId() + "数据已存在,跳过该查询");
                 }
             }
         }
@@ -93,43 +87,33 @@ public class MeituanMain {
         return mapper.selectByExample(example);
     }
 
-    public static List<Shop> getDataList() throws Exception {
-        String ajaxUrl = "https://i.meituan.com/education/searchMtShopAjax?cityid=56&lat=31.837825&lng=117.13875&pageSize=10&categoryid=20285&fromApp=false&token=&searchParam=%7B%22ctx_utmTerm%22%3A%22%22%2C%22ctx_lat%22%3A%2231.837825%22%2C%22ctx_lng%22%3A%22117.13875%22%2C%22ctx_ci%22%3A%2256%22%2C%22ctx_uuid%22%3A%22e1526cddfd69406eb9b7.1570877727.1.0.0%22%2C%22ctx_userid%22%3A0%2C%22ctx_utmCampaign%22%3A%22%22%2C%22ctx_utmSource%22%3A%22%22%2C%22ctx_utmMedium%22%3A%22ios%22%2C%22ctx_versionName%22%3A%22%22%2C%22ctx_source%22%3A%22H5%22%7D" +
-                "&page=";
-        List dataList = new ArrayList();
-        Gson gson = new Gson();
-        for (int i = 1; i < 1000; i++) {
-            System.out.println("正在进行第" + i + "次请求");
-            Map map = new HashMap();
-            map.put("Content-Type", "application/json;charset=UTF-8");
-            map.put("x-forwarded-for", "183.232.231.174");
-            map.put("Referer", "https://i.meituan.com/jiaoyupeixun/channel?stid_b=3&cevent=homepage%2Fcategory1%2F20285");
-            map.put("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
-            String ajaxResponse = HttpRequestUtil.getGet2Json(ajaxUrl + i, null, map);
-            Map json = gson.fromJson(ajaxResponse, Map.class);
-            if (json == null || json.isEmpty()) {
-                System.out.println((i + "次请求,数据为空，结束请求"));
-                break;
-            } else if (json.get("code") == null || String.valueOf(json.get("code")).indexOf("200") == -1) {
-                System.out.println(i + "次请求失败=========" + ajaxResponse);
-            } else {
-                List<Map> result = (List) ((Map) json.get("msg")).get("result");
-                if (result != null && !result.isEmpty()) {
-                    for (Map o : result) {
-                        String shopId = new BigDecimal(o.get("shopId").toString()).toPlainString();
-                        System.out.println("meituan shopId : " + shopId);
-                        o.put("mShopId", shopId);
-                        o.remove("shopId");
-                        Shop shop = gson.fromJson(gson.toJson(o), Shop.class);
-                        dataList.add(shop);
-                    }
-                } else {
-                    System.out.println(i + "次请求,数据为空,结束请求");
-                    break;
-                }
-            }
+    public static List<ShopCategory> getSecond() throws Exception {
+        String ajaxUrl = "http://www.dianping.com/hefei/ch75/g2872";
+        Map map = new HashMap();
+        map.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+        map.put("Accept-Encoding", "gzip, deflate");
+        map.put("Accept-Language", "zh-CN,zh;q=0.9");
+        map.put("Cache-Control", "max-age=0");
+        map.put("Connection", "keep-alive");
+        map.put("Cookie", "navCtgScroll=200; _lxsdk_cuid=16a452ac559c8-0d47f0b3b06736-551e3f12-100200-16a452ac55bc8; _lxsdk=16a452ac559c8-0d47f0b3b06736-551e3f12-100200-16a452ac55bc8; Hm_lvt_e6f449471d3527d58c46e24efb4c343e=1555938592; _hc.v=3b464c0a-f02b-c4d9-13b4-9b833d411937.1555938592; lgtoken=05024e20d-becd-4c1b-aeb1-c14c88363810; cy=110; cye=hefei; Hm_lvt_4c4fc10949f0d691f3a2cc4ca5065397=1571661524; Hm_lpvt_4c4fc10949f0d691f3a2cc4ca5065397=1571661524; s_ViewType=10; _lxsdk_s=16dee539885-aad-ee8-4c6%7C%7C55");
+        map.put("Host", "www.dianping.com");
+        map.put("Referer", "http://www.dianping.com/hefei/ch75");
+        map.put("Upgrade-Insecure-Requests", "1");
+        map.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.92 Safari/537.36");
+        String get2Json = HttpRequestUtil.getGet2Json(ajaxUrl, null, map);
+        List<Element> list = HtmlParseUtil.getList(get2Json, "//div[@class='sec-items']//a[@class='second-item']");
+        List<ShopCategory> result = new ArrayList<>();
+        for (Element element : list) {
+            ShopCategory shopCategory = new ShopCategory();
+            Object href = HtmlParseUtil.getInfoByJXDocument(element.html(), "//@href");
+            Object category = HtmlParseUtil.getInfoByJXDocument(element.html(), "//@data-category");
+            Object categoryName = HtmlParseUtil.getInfoByJXDocument(element.html(), "//text()");
+            shopCategory.setCategory(StringUtil.getString(category));
+            shopCategory.setLinkHref(StringUtil.getString(href));
+            shopCategory.setName(StringUtil.getString(categoryName));
+            result.add(shopCategory);
         }
-        return dataList;
+        return result;
     }
 
     public static Map<String, Object> getDetail(Long shopId, String url) throws Exception {

@@ -1,7 +1,7 @@
-package com.spider.meituan;
+package com.spider.dazhong;
 
 import cn.wanghaomiao.xpath.model.JXDocument;
-import com.spider.meituan.entity.Comment;
+import com.spider.dazhong.entity.Comment;
 import com.spider.util.HtmlProccessInterface;
 import com.spider.util.HtmlParseUtil;
 import com.spider.util.StringUtil;

@@ -14,4 +14,12 @@ public class StringUtil {
         str = str.replaceAll("[^\\u0000-\\uFFFF]", "");
         return str;
     }
+
+    public static String getString(Object object) {
+        if (object == null) {
+            return null;
+        } else {
+            return object.toString();
+        }
+    }
 }

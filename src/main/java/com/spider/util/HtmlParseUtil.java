@@ -10,7 +10,15 @@ import java.util.List;
  * @date 2019/10/19 12:33
  */
 
-public class JXDocumentUtil {
+public class HtmlParseUtil {
+
+    public static Object getInfoByJXDocument(String html, String xpath) {
+        return getInfoByJXDocument(new JXDocument(html), xpath);
+    }
+
+    public static List getList(String html, String xpath) {
+        return getList(new JXDocument(html), xpath);
+    }
 
     public static Object getInfoByJXDocument(JXDocument jxDocument, String xpath) {
         List<Object> avgList = jxDocument.sel(xpath);

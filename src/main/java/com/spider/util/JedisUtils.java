@@ -52,13 +52,13 @@ public class JedisUtils {
 
     public synchronized static Jedis getJedis() {
         try {
-            if (jedisPool != null) {
-                Jedis resource = jedisPool.getResource();
-                System.out.println("redis--服务正在运行: " + resource.ping());
-                return resource;
-            } else {
+//            if (jedisPool != null) {
+//                Jedis resource = jedisPool.getResource();
+//                System.out.println("redis--服务正在运行: " + resource.ping());
+//                return resource;
+//            } else {
                 return null;
-            }
+//            }
         } catch (Exception e) {
             e.printStackTrace();
             return null;

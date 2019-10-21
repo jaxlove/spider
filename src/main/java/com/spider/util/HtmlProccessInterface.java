@@ -30,7 +30,7 @@ public abstract class HtmlProccessInterface {
         if (proccess != null) {
             list.addAll(proccess);
         }
-        Object target = JXDocumentUtil.getInfoByJXDocument(new JXDocument(html), targetUrlPath);
+        Object target = HtmlParseUtil.getInfoByJXDocument(new JXDocument(html), targetUrlPath);
         if (target != null) {
             String ajaxResponse = HttpRequestUtil.getGet2Json(UrlUtils.getUrl(formatTargetUrl(target.toString())), null, map);
             handleHtml(ajaxResponse, targetUrlPath, map, list);
