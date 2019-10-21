@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <properties resource="jdbc.properties" />
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC" />
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driverClassName}" />
+                <property name="url" value="${jdbc.url}" />
+                <property name="username" value="${jdbc.username}" />
+                <property name="password" value="${jdbc.password}" />
+            </dataSource>
+        </environment>
+    </environments>
+    <!-- 将映射的文件指定到类中而不是资源文件中，可用resource 或者class指定到资源文件中 -->
+    <mappers>
+        <package name="com.spider.meituan.dao"/>
+    </mappers>
+<!--    <mappers>-->
+<!--        <mapper class="com.spider.meituan.dao.ShopMapper" />-->
+<!--    </mappers>-->
+</configuration>
