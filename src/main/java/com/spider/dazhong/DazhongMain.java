@@ -60,68 +60,41 @@ public class DazhongMain {
     public static List<Shop> getList(ShopCategory shopCategory) throws IOException {
         if (StringUtils.isNotBlank(shopCategory.getLinkHref())) {
             List<Shop> returnList = new ArrayList<>();
-            String get2Json = HttpRequestUtil.getGet2Json(shopCategory.getLinkHref(), null, getMapHead());
-            List<Element> list = HtmlParseUtil.getList(get2Json, "//div[@class='shop-list J_shop-list shop-all-list']/ul/li");
-            if (list != null && !list.isEmpty()) {
-                for (Element element : list) {
-                    Shop shop = new Shop();
-                    Object img = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='pic']//img/@data-src");
-                    Object url = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='pic']/a/@href");
-                    Object name = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='txt']/div[@class='tit']//h4/text()");
-                    Object shopId = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='txt']/div[@class='tit']/a/@data-shopid");
-                    Object powerClass = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='comment']/span/@class");
-//                    Object address = HtmlParseUtil.getInfoByHtml(element.html(),"//div[@class='tag-addr']/span[@class='addr']/text()");
-                    Object type = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='tag-addr']/a//span[@class='tag']/text()");
-                    shop.setDefaultPic(StringUtil.getString(img));
-                    shop.setShopLink(StringUtil.getString(url));
-                    shop.setCategoryName(shopCategory.getCategory() + "_" + StringUtil.getString(type));
-                    shop.setShopName(StringUtil.getString(name));
-                    shop.setmShopId(StringUtil.getString(shopId));
-                    shop.setShopPower(StringUtil.getString(powerClass));
-                    logger.info(shop);
-                    returnList.add(shop);
-                }
-            }
+            getList(shopCategory.getLinkHref(), shopCategory.getCategory(), returnList, "//a[@class='next']/@href");
             return returnList;
         }
         return null;
     }
 
-    public static void getShopDetail() throws Exception {
-        List<Shop> dataList = getDataFromDba();
-        if (dataList != null && !dataList.isEmpty()) {
-            for (Shop shop : dataList) {
-                if (jedis.get(shop.getmShopId()) == null) {
-                    System.err.println("shopId:" + shop.getShopId() + "开始爬取");
-                    Thread.sleep(1);
-                    if (StringUtils.isNotBlank(shop.getShopLink())) {
-                        Map<String, Object> detail = getDetail(shop.getShopId(), shop.getShopLink());
-                        ShopDetail shopDetail = (ShopDetail) detail.get("shopDetail");
-                        MyBatisUtil.getMapper(ShopDetailMapper.class).insertSelective(shopDetail);
-                        List<Course> courseList = (List<Course>) detail.get("courses");
-                        if (courseList != null) {
-                            CourseMapper mapper = MyBatisUtil.getMapper(CourseMapper.class);
-                            for (Course course : courseList) {
-                                mapper.insertSelective(course);
-                            }
-                        }
-                        List<Comment> commentList = (List<Comment>) detail.get("comment");
-                        if (commentList != null) {
-                            CommentMapper mapper = MyBatisUtil.getMapper(CommentMapper.class);
-                            for (Comment comment : commentList) {
-                                mapper.insertSelective(comment);
-                            }
-                        }
-                        jedis.set(shop.getmShopId(), "1");
-                    } else {
-                        System.out.println("shopId:" + shop.getShopId() + " shopLink为空,跳过");
-                    }
-                } else {
-                    System.out.println("meituan shopId:" + shop.getmShopId() + "数据已存在,跳过该查询");
-                }
+    public static void getList(String url, String category, List list, String targetPath) throws IOException {
+        String get2Json = HttpRequestUtil.getGet2Json(url, null, getMapHead());
+        List<Element> listElement = HtmlParseUtil.getList(get2Json, "//div[@class='shop-list J_shop-list shop-all-list']/ul/li");
+        if (list != null && !list.isEmpty()) {
+            for (Element element : listElement) {
+                Shop shop = new Shop();
+                Object img = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='pic']//img/@data-src");
+                Object shopUrl = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='pic']/a/@href");
+                Object name = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='txt']/div[@class='tit']//h4/text()");
+                Object shopId = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='txt']/div[@class='tit']/a/@data-shopid");
+                Object powerClass = HtmlParseUtil.getInfoByHtml(element.html(), "//div[@class='comment']/span/@class");
+                shop.setDefaultPic(StringUtil.getString(img));
+                shop.setShopLink(StringUtil.getString(shopUrl));
+                shop.setCategory(category);
+                shop.setShopName(StringUtil.getString(name));
+                shop.setmShopId(StringUtil.getString(shopId));
+                shop.setShopPower(DazhongUtil.getPower(powerClass));
+                logger.info(shop);
+                list.add(shop);
             }
         }
+        Object infoByHtml = HtmlParseUtil.getInfoByHtml(get2Json, targetPath);
+        if (infoByHtml != null) {
+            getList(StringUtil.getString(infoByHtml), category, list, targetPath);
+        }else {
+            System.out.println("类型"+category+"爬取结束");
+        }
     }
+
 
     public static List<Shop> getDataFromDba() {
         ShopMapper mapper = MyBatisUtil.getMapper(ShopMapper.class);
@@ -164,65 +137,5 @@ public class DazhongMain {
         map.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.92 Safari/537.36");
         return map;
     }
-
-    public static Map<String, Object> getDetail(Long shopId, String url) throws Exception {
-        Gson gson = new Gson();
-        Map map = new HashMap();
-        map.put("Referer", url);
-        map.put("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
-        map.put("Connection", "keep-alive");
-        map.put("Cookie", "JSESSIONID=xepwa05ggsql1ohhs3sje7wo3; IJSESSIONID=xepwa05ggsql1ohhs3sje7wo3; iuuid=43FFC4C3B2DFADC4805777F52F4B91BDBB833161669D4D2EC518A4A288BDE9F4; latlng=31.78204%2C117.228065%2C1571463280881; ci=56; cityname=%E5%90%88%E8%82%A5; nodown=yes; _lxsdk_cuid=16de282c50ec8-09b576fb043568-2d604637-4a574-16de282c50fc8; _lxsdk=43FFC4C3B2DFADC4805777F52F4B91BDBB833161669D4D2EC518A4A288BDE9F4; _lxsdk_s=16de282c405-720-d7f-707%7C%7C2; i_extend=H__a100037__b1; __utma=74597006.737165552.1571463284.1571463284.1571463284.1; __utmc=74597006; __utmz=74597006.1571463284.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); idau=1; __utmb=74597006.2.9.1571463329668");
-        map.put("x-forwarded-for", "183.232.231.174");
-        map.put("Sec-Fetch-Mode", "navigate");
-        map.put("Sec-Fetch-Site", "cross-site");
-        map.put("Sec-Fetch-User", "?1");
-        map.put("x-forwarded-for", "183.232.231.174");
-        map.put("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
-        String html = HttpRequestUtil.getGet2Json(UrlUtils.getUrl(url), null, map);
-        JXDocument jxDocument = new JXDocument(html);
-        Object avg = HtmlParseUtil.getInfoByDocument(jxDocument, "//div[@class='rating']/span[@class='avg-price']/text()");
-        Object addressMap = HtmlParseUtil.getInfoByDocument(jxDocument, "//h6[@class='address-block']/a[@class='react']/@href");
-        Object address = HtmlParseUtil.getInfoByDocument(jxDocument, "//h6[@class='address-block']/a[@class='react']/div[@class='poi-address']/text()");
-        Object phone = HtmlParseUtil.getInfoByDocument(jxDocument, "//div/p/a[@data-com='phonecall']/@data-tele");
-        List<Element> courseList = HtmlParseUtil.getList(jxDocument, "//dl[@class='list']//dl[@class='list bd-deal-list']//dd");
-        Object commentUrl = HtmlParseUtil.getInfoByDocument(jxDocument, "//dd[@class='buy-comments db']/a[@class='react']/@href");
-        Map detail = new HashMap();
-        detail.put("avg", avg);
-        detail.put("shopId", shopId);
-        detail.put("addressMap", addressMap);
-        detail.put("address", address);
-        detail.put("phone", phone);
-        detail.put("avg", avg);
-        Map result = new HashMap();
-        ShopDetail shopDetail = gson.fromJson(gson.toJson(detail), ShopDetail.class);
-        result.put("shopDetail", shopDetail);
-        System.out.println(gson.toJson(shopDetail));
-        List<Course> courses = new ArrayList<>();
-        if (courseList != null && !courseList.isEmpty()) {
-            for (Element element : courseList) {
-                Object courseName = HtmlParseUtil.getInfoByDocument(new JXDocument(element.html()), "//a[@class='react ']/@title");
-                Object img = HtmlParseUtil.getInfoByDocument(new JXDocument(element.html()), "//div[@class='dealcard-img imgbox']/@data-src-high");
-                Map courseMap = new HashMap();
-                courseMap.put("shopId", shopId);
-                courseMap.put("name", courseName);
-                if (img != null) {
-                    courseMap.put("img", UrlUtils.getUrl(img.toString()));
-                }
-                Course course = gson.fromJson(gson.toJson(courseMap), Course.class);
-                courses.add(course);
-            }
-        }
-        result.put("courses", courses);
-        if (commentUrl != null) {
-            Map param = new HashMap();
-            param.put("shopId", shopId);
-            List<Comment> data = new CommentProccess().getData(commentUrl.toString(), "//a[@gaevent='imt/deal/feedbacklist/pageNext']/@data-page-num", map, param);
-            result.put("comment", data);
-        } else {
-            System.out.println(shopId + "=== 没有评论");
-        }
-        return result;
-    }
-
 
 }
