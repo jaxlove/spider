@@ -14,7 +14,7 @@ public class ShopCategory {
     private String linkHref;
 
     private String name;
-
+    
     public String getName() {
         return name;
     }
@@ -37,5 +37,14 @@ public class ShopCategory {
 
     public void setLinkHref(String linkHref) {
         this.linkHref = linkHref;
+    }
+
+    @Override
+    public String toString() {
+        return "ShopCategory{" +
+                "category='" + category + 
+                ", linkHref='" + linkHref + 
+                ", name='" + name + 
+                '}';
     }
 }

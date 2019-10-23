@@ -26,8 +26,8 @@ public class CommentProccess extends HtmlProccessInterface {
         if (list != null && !list.isEmpty()) {
             list = (List) list.stream().map(t -> {
                 Element e = (Element) t;
-                Object cotent = HtmlParseUtil.getInfoByJXDocument(new JXDocument(e.html()), "//div[@class='comment']//text()");
-                Object time = HtmlParseUtil.getInfoByJXDocument(new JXDocument(e.html()), "//div[@class='user-info-text']//div[@class='score']/weak/text()");
+                Object cotent = HtmlParseUtil.getInfoByDocument(new JXDocument(e.html()), "//div[@class='comment']//text()");
+                Object time = HtmlParseUtil.getInfoByDocument(new JXDocument(e.html()), "//div[@class='user-info-text']//div[@class='score']/weak/text()");
                 List imgs = HtmlParseUtil.getList(new JXDocument(e.html()), "//div[@class='pics']//span/@data-src");
                 List starsFull = HtmlParseUtil.getList(new JXDocument(e.html()),
                         "//div[@class='user-info-text']//div[@class='score']/span[@class='stars']/img[@class='icn_star star_full']");

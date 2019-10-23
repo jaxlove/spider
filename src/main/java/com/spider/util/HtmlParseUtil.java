@@ -12,15 +12,15 @@ import java.util.List;
 
 public class HtmlParseUtil {
 
-    public static Object getInfoByJXDocument(String html, String xpath) {
-        return getInfoByJXDocument(new JXDocument(html), xpath);
+    public static Object getInfoByHtml(String html, String xpath) {
+        return getInfoByDocument(new JXDocument(html), xpath);
     }
 
     public static List getList(String html, String xpath) {
         return getList(new JXDocument(html), xpath);
     }
 
-    public static Object getInfoByJXDocument(JXDocument jxDocument, String xpath) {
+    public static Object getInfoByDocument(JXDocument jxDocument, String xpath) {
         List<Object> avgList = jxDocument.sel(xpath);
         if (avgList != null && avgList.size() > 0) {
             return avgList.get(0);

@@ -110,4 +110,19 @@ public class Shop {
     public void setDefaultPic(String defaultPic) {
         this.defaultPic = defaultPic;
     }
+
+    @Override
+    public String toString() {
+        return "Shop{" +
+                "shopId=" + shopId +
+                ", shopName='" + shopName + 
+                ", category='" + category + 
+                ", mShopId='" + mShopId + 
+                ", categoryName='" + categoryName + 
+                ", shopLink='" + shopLink + 
+                ", shopPower='" + shopPower + 
+                ", regionName='" + regionName + 
+                ", defaultPic='" + defaultPic + 
+                '}';
+    }
 }

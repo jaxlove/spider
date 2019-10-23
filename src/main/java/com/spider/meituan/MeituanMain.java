@@ -146,12 +146,12 @@ public class MeituanMain {
         map.put("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
         String html = HttpRequestUtil.getGet2Json(UrlUtils.getUrl(url), null, map);
         JXDocument jxDocument = new JXDocument(html);
-        Object avg = HtmlParseUtil.getInfoByJXDocument(jxDocument, "//div[@class='rating']/span[@class='avg-price']/text()");
-        Object addressMap = HtmlParseUtil.getInfoByJXDocument(jxDocument, "//h6[@class='address-block']/a[@class='react']/@href");
-        Object address = HtmlParseUtil.getInfoByJXDocument(jxDocument, "//h6[@class='address-block']/a[@class='react']/div[@class='poi-address']/text()");
-        Object phone = HtmlParseUtil.getInfoByJXDocument(jxDocument, "//div/p/a[@data-com='phonecall']/@data-tele");
+        Object avg = HtmlParseUtil.getInfoByDocument(jxDocument, "//div[@class='rating']/span[@class='avg-price']/text()");
+        Object addressMap = HtmlParseUtil.getInfoByDocument(jxDocument, "//h6[@class='address-block']/a[@class='react']/@href");
+        Object address = HtmlParseUtil.getInfoByDocument(jxDocument, "//h6[@class='address-block']/a[@class='react']/div[@class='poi-address']/text()");
+        Object phone = HtmlParseUtil.getInfoByDocument(jxDocument, "//div/p/a[@data-com='phonecall']/@data-tele");
         List<Element> courseList = HtmlParseUtil.getList(jxDocument, "//dl[@class='list']//dl[@class='list bd-deal-list']//dd");
-        Object commentUrl = HtmlParseUtil.getInfoByJXDocument(jxDocument, "//dd[@class='buy-comments db']/a[@class='react']/@href");
+        Object commentUrl = HtmlParseUtil.getInfoByDocument(jxDocument, "//dd[@class='buy-comments db']/a[@class='react']/@href");
         Map detail = new HashMap();
         detail.put("avg", avg);
         detail.put("shopId", shopId);
@@ -166,8 +166,8 @@ public class MeituanMain {
         List<Course> courses = new ArrayList<>();
         if (courseList != null && !courseList.isEmpty()) {
             for (Element element : courseList) {
-                Object courseName = HtmlParseUtil.getInfoByJXDocument(new JXDocument(element.html()), "//a[@class='react ']/@title");
-                Object img = HtmlParseUtil.getInfoByJXDocument(new JXDocument(element.html()), "//div[@class='dealcard-img imgbox']/@data-src-high");
+                Object courseName = HtmlParseUtil.getInfoByDocument(new JXDocument(element.html()), "//a[@class='react ']/@title");
+                Object img = HtmlParseUtil.getInfoByDocument(new JXDocument(element.html()), "//div[@class='dealcard-img imgbox']/@data-src-high");
                 Map courseMap = new HashMap();
                 courseMap.put("shopId", shopId);
                 courseMap.put("name", courseName);
