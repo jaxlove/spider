@@ -54,7 +54,8 @@ public class HttpRequestUtil {
         return result;
     }
 
-    public static String getGet2Json(String url, Map<String, String> head) throws IOException {
+    public static Map<String,String> getGet2Json(String url, Map<String, String> head) throws IOException {
+        Map<String,String> map = new HashMap<>();
         CloseableHttpClient httpClient = HttpClients.createDefault();
         HttpGet httpGet = new HttpGet(url);
         RequestConfig defaultRequestConfig = RequestConfig.custom()
@@ -68,6 +69,8 @@ public class HttpRequestUtil {
         try {
             response = httpClient.execute(httpGet);
             System.err.println("请求返回code=="+response.getStatusLine().getStatusCode());
+            map.put("code",String.valueOf(response.getStatusLine().getStatusCode()));
+
             HttpEntity entity = response.getEntity();
             result = EntityUtils.toString(entity, "UTF-8");
             if (response.getHeaders("Set-Cookie") != null && response.getHeaders("Set-Cookie").length > 0) {
@@ -84,6 +87,7 @@ public class HttpRequestUtil {
             }
             httpClient.close();
         }
-        return result;
+        map.put("result",result);
+        return map;
     }
 }
