@@ -18,6 +18,7 @@
     <!-- 将映射的文件指定到类中而不是资源文件中，可用resource 或者class指定到资源文件中 -->
     <mappers>
         <package name="com.spider.meituan.dao"/>
+        <package name="com.spider.dazhong.dao"/>
     </mappers>
 <!--    <mappers>-->
 <!--        <mapper class="com.spider.meituan.dao.ShopMapper" />-->

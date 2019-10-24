@@ -105,7 +105,7 @@ public class MeituanMain {
             map.put("x-forwarded-for", "183.232.231.174");
             map.put("Referer", "https://i.meituan.com/jiaoyupeixun/channel?stid_b=3&cevent=homepage%2Fcategory1%2F20285");
             map.put("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
-            String ajaxResponse = HttpRequestUtil.getGet2Json(ajaxUrl + i, null, map);
+            String ajaxResponse = HttpRequestUtil.getGet2Json(ajaxUrl + i,  map);
             Map json = gson.fromJson(ajaxResponse, Map.class);
             if (json == null || json.isEmpty()) {
                 System.out.println((i + "次请求,数据为空，结束请求"));
@@ -144,7 +144,7 @@ public class MeituanMain {
         map.put("Sec-Fetch-Site", "cross-site");
         map.put("Sec-Fetch-User", "?1");
         map.put("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
-        String html = HttpRequestUtil.getGet2Json(UrlUtils.getUrl(url), null, map);
+        String html = HttpRequestUtil.getGet2Json(UrlUtils.getUrl(url),  map);
         JXDocument jxDocument = new JXDocument(html);
         Object avg = HtmlParseUtil.getInfoByDocument(jxDocument, "//div[@class='rating']/span[@class='avg-price']/text()");
         Object addressMap = HtmlParseUtil.getInfoByDocument(jxDocument, "//h6[@class='address-block']/a[@class='react']/@href");

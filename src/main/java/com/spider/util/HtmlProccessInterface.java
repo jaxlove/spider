@@ -32,7 +32,7 @@ public abstract class HtmlProccessInterface {
         }
         Object target = HtmlParseUtil.getInfoByDocument(new JXDocument(html), targetUrlPath);
         if (target != null) {
-            String ajaxResponse = HttpRequestUtil.getGet2Json(UrlUtils.getUrl(formatTargetUrl(target.toString())), null, map);
+            String ajaxResponse = HttpRequestUtil.getGet2Json(UrlUtils.getUrl(formatTargetUrl(target.toString())),  map);
             handleHtml(ajaxResponse, targetUrlPath, map, list);
         }
     }
@@ -40,7 +40,7 @@ public abstract class HtmlProccessInterface {
     public List getData(String startUrl, String targetUrlPath, Map map,Map param) throws IOException {
         this.param = param;
         this.startUrl = startUrl;
-        String ajaxResponse = HttpRequestUtil.getGet2Json(UrlUtils.getUrl(startUrl), null, map);
+        String ajaxResponse = HttpRequestUtil.getGet2Json(UrlUtils.getUrl(startUrl), map);
         List list = new ArrayList();
         if (ajaxResponse != null) {
             handleHtml(ajaxResponse, targetUrlPath, map, list);
